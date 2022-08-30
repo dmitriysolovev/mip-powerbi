@@ -1,0 +1,37 @@
+CALENDAR(DATE(2016,1,1),DATE(2018,12,31))
+
+Календарь = 
+var _cal0 = CALENDAR(DATE(2016,1,1),DATE(2018,12,31))
+
+Return
+ADDCOLUMNS(_cal0,
+"Номер месяца", MONTH([Date])
+,"Месяц",FORMAT([Date],"MMMM")
+,"Год",YEAR([Date])
+,"Квартал","Кв. "&QUARTER([Date])
+,"День месяца",DAY([Date])
+,"День недели",FORMAT([Date],"DDDD")
+,"Номер дня недели",WEEKDAY([Date],2)
+,"Месяц-год",FORMAT([Date],"MMM-YYYY")
+,"Номер месяца года",YEAR([Date])*100+MONTH([Date])
+)
+
+Продажи факт YTD = CALCULATE([Продажа факт],DATESYTD('Календарь'[Date]))
+Продажи факт MTD = CALCULATE([Продажа факт],DATESMTD('Календарь'[Date]))
+Продажи факт QTD = CALCULATE([Продажа факт],DATESQTD('Календарь'[Date]))
+
+Продажи факт пр. год = CALCULATE([Продажа факт],DATEADD('Календарь'[Date],-1,YEAR))
+Продажи откл. пр.год = [Продажа факт]-[Продажи факт пр. год]
+% откл. продажи пр. год = DIVIDE([Продажи откл. пр.год],[Продажи факт пр. год])
+Начало периода = MIN('Календарь'[Date])
+Конец периода = Max('Календарь'[Date])
+Первая дата в календаре = CALCULATE([Начало периода],REMOVEFILTERS('Календарь'))
+
+Большие продажи = FILTER('Продажи','Продажи'[Цена продажи]>2000)
+
+Продажи нак. итог = 
+var _firstdate = CALCULATE(MIN('Календарь'[Date]),REMOVEFILTERS('Календарь'))
+var _lastdate = MAX('Календарь'[Date])
+var _out = CALCULATE([Продажа факт],FILTER(All('Календарь'),'Календарь'[Date]<=_lastdate))
+Return _out
+
