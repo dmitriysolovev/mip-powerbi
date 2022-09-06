@@ -1,0 +1,34 @@
+Маржа с учетом скидки = [Продажа с учетом скидки]-[Себестоимость товара]
+Продажа с учетом скидки = [Продажа факт]*(1+[Значение Скидка/наценка])
+Продажи_клиенты_all_selected = CALCULATE([Продажа факт],ALLSELECTED('Клиенты'))
+
+
+IsInscope_Продавцы = ISINSCOPE('Продавцы'[Продавец])
+IsInscope_Товары = ISINSCOPE('Товары'[Товар])
+IsInscope_Клиенты = ISINSCOPE('Клиенты'[Клиент])
+Продажи+1 уровень = 
+Var _denominator = SWITCH(TRUE()
+,[IsInscope_Товары],1
+,[IsInscope_Клиенты],2
+,[IsInscope_Продавцы],3)
+Return _denominator
+
+Продажи+1 уровень = 
+Var _denominator = SWITCH(TRUE()
+,[IsInscope_Товары],CALCULATE([Продажа факт],ALLSELECTED('Товары'[Товар]))
+,[IsInscope_Клиенты],CALCULATE([Продажа факт],ALLSELECTED('Клиенты'[Клиент]))
+,[IsInscope_Продавцы],CALCULATE([Продажа факт],ALLSELECTED('Продавцы'[Продавец]))
+,[Продажа факт])
+Return _denominator
+
+% от верхнего уровня = 
+Var _fact = [Продажа факт]
+Var _Sales_top_level = SWITCH(TRUE()
+,[IsInscope_Товары],CALCULATE([Продажа факт],ALLSELECTED('Товары'[Товар]))
+,[IsInscope_Клиенты],CALCULATE([Продажа факт],ALLSELECTED('Клиенты'[Клиент]))
+,[IsInscope_Продавцы],CALCULATE([Продажа факт],ALLSELECTED('Продавцы'[Продавец]))
+,[Продажа факт])
+
+Return DIVIDE(_fact,_Sales_top_level)
+
+Продажи_ранг = RANKX('Продавцы',[Продажа факт],,DESC,Dense)
