@@ -1,0 +1,25 @@
+Продавцы_ранг_по_продажам_ = 
+Var _tbl = Calculatetable(VALUES('Продавцы'[Продавец]),ALL('Продавцы'[Продавец]))
+Return If(COUNTROWS('Продавцы')=1
+,RANKX(_tbl,[Продажа факт],,DESC,Dense)
+,BLANK())
+
+
+Продавцы_ранг_по_продажам_ = 
+Var _tbl = Calculatetable('Продавцы',ALL('Продавцы'[Продавец],'Продавцы'[ИД Продавца]))
+Return If(COUNTROWS('Продавцы')=1
+,RANKX(_tbl,[Продажа факт],,DESC,Dense)
+,BLANK()) - Если есть сортировка по другому столбцу, в данном примере ИД Продавца
+
+Динамический TOP Продавцов = 
+Var _topn = SELECTEDVALUE('TopN'[TopN],0)
+Return
+SWITCH(TRUE()
+,_topn = 0,[Продажа факт]
+,RANKX(ALLSELECTED('Продавцы'[Продавец],'Продавцы'[ИД Продавца]),[Продажа факт],,DESC)<=_topn,[Продажа факт])
+
+Top N Продавцы = 
+Var _topn = SELECTEDVALUE('TopN'[TopN])
+Var _topntbl = TOPN(_topn,ALLSELECTED('Продавцы'),[Продажа факт],DESC)
+Return
+CALCULATE([Продажа факт],_topntbl)
